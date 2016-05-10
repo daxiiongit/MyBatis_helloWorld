@@ -73,6 +73,38 @@ mapper规范：
     3.将映射文件 UserMapper.xml 加入到 SqlMapConfig.xml中
     4.写测试代码
 
+五、SqlMapConfig.xml 配置文件常用
+    1. properties: 专门用于加载属性文件方便对属性配置文件统一管理，避免硬编码。
+        添加数据库连接属性配置文件:db.properties 文件，在SqlMapConfig.xml 中引用即可
+
+    2.settings:全局配置，不能乱配置
+    3.typeAliases:映射文件引用类型的别名配置
+    4.mappers:配置映射文件加载(重点)
+        使用接口的方式来加载单个映射文件:需要设置映射类和映射配置文件名字相同，而且满足mapper代理的规范，并且放在同一个包中，则可以直接写映射类型
+
+六、输入映射
+    操作时输入参数可能为简单类型，hashMap，List，pojo，pojo包装类型
+    1.输入类型为pojo包装类型(用户信息综合查询)
+        1.1创建 User 的扩展类 和 包装类
+        1.2在映射文件中创建 用户信息综合查询的接口
+        1.3在映射配置文件中配置相应的sql语句，这里注意要使用对象.属性的方式来获取相应的值
+        1.4测试代码，需要构建包装的pojo对象
+
+
+七、输出映射
+    1.输出类型为 简单类型，如计算综合查询列表的总数，用户实现分页
+        1.1在映射文件中配置 statement
+        1.2在mapper代理类中定义接口
+        1.3测试代码
+
+八、resultMap 的使用
+    1.定义resultMap
+        1.1在映射文件中定义，使用标签
+    2.使用resultMap
+
+
+
+
 三、问题：
     1.找不到配置文件的错误：java.io.IOException: Could not find resource /config/SqlMapConfig.xml
     解决方案：将配置文件都加到src目录面，直接写配置文件的名字即可。
@@ -80,7 +112,28 @@ mapper规范：
     org.apache.ibatis.exceptions.PersistenceException:
     ### Error querying database.  Cause: org.apache.ibatis.reflection.ReflectionException: There is no getter for property named 'username' in 'class java.lang.String'
     ### Cause: org.apache.ibatis.reflection.ReflectionException: There is no getter for property named 'username' in 'class java.lang.String'
+    3.数据库连接错误：
+    Cause: java.sql.SQLException: Access denied for user 'root'@'localhost' (using password: YES)
+    解决方案：修改数据库连接密码
+    4.别名写错：
+    Caused by: org.apache.ibatis.builder.BuilderException: Error resolving class. Cause: org.apache.ibatis.type.TypeException: Could not resolve type alias 'user5'.
+    5.扫描映射接口包时，扫描错误：
+    org.apache.ibatis.binding.BindingException: Type interface com.sunyanxiong.mapper.UserMapper is not known to the MapperRegistry.
+
+    6.不能找到类
+    Caused by: org.apache.ibatis.builder.BuilderException: Error parsing SQL Mapper Configuration. Cause: org.apache.ibatis.builder.BuilderException: Error parsing Mapper XML. Cause: org.apache.ibatis.builder.BuilderException: Error resolving class. Cause: org.apache.ibatis.type.TypeException: Could not resolve type alias 'userResultMap'.  Cause: java.lang.ClassNotFoundException: Cannot find class: userResultMap
+    解决方案，使用的时候要使用 resultMap属性
+
+    7.sql语句拼接错误,在标签中注释尽量使用 <!----> ，不要使用其他的，避免会将注解当作代码执行
+    Error querying database.  Cause: com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND user.sex = '1' AND user.username L' at line 7
 
 四、总结：
     1.查看当前项目的目录：System.out.println(System.getProperty("user.dir"));
+    2.提交代码到github：
+        步骤：
+        (1)点击 VCS -> Import into Version Control -> Great Git Repository
+        (2)点击项目右键 -> Git -> +Add
+        (3)点击项目右键 -> Git -> Commit
+        (4)点击项目右键 -> Git -> Push
+
 

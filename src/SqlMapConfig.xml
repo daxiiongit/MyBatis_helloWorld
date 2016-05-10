@@ -5,6 +5,34 @@
 
 <configuration>
 
+    <!-- 使用properties 配置数据库连接信息,这里也可以配置一些属性，但是不建议在这里配置，会引起一些不必要的问题 -->
+    <properties resource="db.properties">
+        <!-- 先读取 -->
+        <!--<property name="jdbc.password" value="sunyanxiong"></property>-->
+    </properties>
+
+    <!-- settings:配置全局参数，需要使用的时候再配置，不要随便使用，不然会影响MyBatis的运行 -->
+
+   <!-- <settings>
+        <setting name="" value=""/>
+    </settings>-->
+
+    <!-- typeAliases:映射文件中引用的单个别名的定义
+        type:需要给那个类型来配置别名
+        alias:别名
+     -->
+   <!-- <typeAliases>
+        <typeAlias type="com.sunyanxiong.mybatis.User" alias="user"></typeAlias>
+    </typeAliases>-->
+
+    <!-- 批量别名的定义(常用)
+        自动扫描包,默认的别名为，类名首字母大写或者小写
+    -->
+    <typeAliases>
+        <package name="com.sunyanxiong.mybatis"></package>
+    </typeAliases>
+
+
     <!-- 配置运行环境 -->
     <environments default="development">
         <environment id="development">
@@ -12,10 +40,10 @@
             <transactionManager type="JDBC" />
             <!-- 数据库连接池，由mybatis管理-->
             <dataSource type="POOLED">
-                <property name="driver" value="com.mysql.jdbc.Driver" />
-                <property name="url" value="jdbc:mysql://localhost:3306/mybatis?characterEncoding=utf-8" />
-                <property name="username" value="root" />
-                <property name="password" value="sunyanxiong" />
+                <property name="driver" value="${jdbc.driver}" />
+                <property name="url" value="${jdbc.url}" />
+                <property name="username" value="${jdbc.username}" />
+                <property name="password" value="${jdbc.password}" />
             </dataSource>
         </environment>
     </environments>
@@ -25,7 +53,14 @@
         <mapper resource="User.xml"></mapper>
 
         <!-- 加载使用mapper代理对象自动生成实现的映射文件 -->
-        <mapper resource="UserMapper.xml"></mapper>
+        <!--<mapper resource="UserMapper.xml"></mapper>-->
+
+        <!-- 使用接口的方式来加载单个映射文件 -->
+       <!-- <mapper class="com.sunyanxiong.mapper.UserMapper"></mapper>-->
+
+        <!-- 批量扫描映射接口 -->
+        <package name="com.sunyanxiong.mapper"></package>
+
     </mappers>
     
 

@@ -1,0 +1,208 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace:此时只是对sql进行分类管理，隔离sql的作用 -->
+
+<!--
+    id:标识映射文件的id；将sql语句封装为mappedStatement对象，所以称id为statement的id；
+    parameterType:输入参数的类型，int：基本类型，如果前端传入的参数不是int类型，就会报错；Integer：封装类型，可以传入其他类型的参数；
+    resultType:输出结果集类型，指定sql输出结果映射的java对象；
+    #{id}:占位符，里面包装了一个参数，接受输入的参数。简单类型的参数，参数名可以任意。
+-->
+<mapper namespace="com.sunyanxiong.mapper.UserMapper">
+
+    <!-- 根据id 来查找用户信息 -->
+    <!-- <select id="findUserById" parameterType="int" resultType="com.sunyanxiong.mybatis.User">
+         SELECT * FROM user WHERE id = #{id};
+     </select>-->
+
+    <!-- &lt;!&ndash; 使用别名 &ndash;&gt;
+     <select id="findUserById" parameterType="int" resultType="user">
+         SELECT * FROM user WHERE id = #{id};
+     </select>-->
+
+    <!-- 测试 resultType :输出字段和pojo中的属性没有全部对应，看属否能够创建查询 -->
+    <!-- 使用别名 -->
+    <!--<select id="findUserById" parameterType="int" resultType="user">
+        SELECT id id_,username username_,birthday birthday_,sex sex_,address address_ FROM user WHERE id = #{id};
+    </select>-->
+
+
+    <!-- 根据用户名来查找用户信息
+        parameterType:模糊查询出来的数据可能是多条，输入类型是、string类型的数据
+        resultType:输出单条结果集会映射为java对象。
+        ${value}:接受参数的内容，如果是简单类型，里面只能写value,
+        %${value}%:这样写会导致sql注入
+    -->
+    <select id="findUserByName" parameterType="String" resultType="com.sunyanxiong.mybatis.User">
+        SELECT * FROM user WHERE username LIKE '%${value}%'
+    </select>
+
+    <!-- 添加用户信息
+        添加用户信息的时候，是将pojo 对象的值添加到数据库，所以输入的类型不再是简单类型，而是pojo对象
+        插入数据的时候不返回任何值，所以不用配置输出结果类型,
+        VALUE(#{username},#{birthday},#{sex},#{address}):里面的参数和User.java里面的属性相同
+    -->
+    <insert id="insertUser" parameterType="com.sunyanxiong.mybatis.User">
+
+        /* 自增主键id 的返回
+        keyProperty:主键对应的 pojo 对象的属性,将查询到的 preparedStatement 设置到插入的那个对象中
+        resultType:查找后返回的结果类型
+        order:表示在执行插入数据之后来将插入的主键 id 值获取
+        */
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            SELECT last_insert_id()
+        </selectKey>
+
+        INSERT INTO user(username,birthday,sex,address) VALUE(#{username},#{birthday},#{sex},#{address});
+    </insert>
+
+    <!-- 删除用户信息 -->
+    <delete id="deleteUserById" parameterType="int">
+        delete from user where id = #{id}
+    </delete>
+
+
+    <!-- 更新用户信息
+        将要修改的对象作为输入类型传入
+        id = #{id}:指的是将传入的对象中的id属性值
+    -->
+    <update id="updateUser" parameterType="com.sunyanxiong.mybatis.User">
+        update user set username = #{username},birthday = #{birthday},sex = #{sex},address = #{address}
+        where id = #{id}
+    </update>
+
+
+    <!-- 用户信息综合查询
+     #{userCustom.sex}:这里需要注意使用对象.属性的方式来获取数据
+     -->
+    <!-- <select id="findUserList" parameterType="com.sunyanxiong.mybatis.UserQueryVo" resultType="com.sunyanxiong.mybatis.UserCustom">
+         SELECT * FROM user WHERE sex = #{userCustom.sex} AND username LIKE '%${userCustom.username}%'
+     </select>-->
+
+    <!-- &lt;!&ndash; 查询综合查询用户信息总数 &ndash;&gt;
+     <select id="findUserCount" parameterType="com.sunyanxiong.mybatis.UserQueryVo" resultType="int">
+         SELECT count(*) FROM user WHERE sex = #{userCustom.sex} AND username LIKE '%${userCustom.username}%'
+     </select>-->
+
+    <!-- 定义resultMap
+      id:resultMap 的唯一标识
+      type:resultMap最终映射成的java对象,可以使用别名
+     -->
+    <resultMap id="userResultMap" type="com.sunyanxiong.mybatis.User">
+        <!-- column:映射后的名字 property:要映射的属性名
+           查询时输入参数的定义
+
+           其实，id 和 result 标签没有本质的区别只是为了区分主键
+         -->
+        <!-- <id column="id_" property="id"></id>-->
+
+        <!--<result column="id_" property="id"></result>
+        <result column="username_" property="username"></result>
+        <result column="birthday_" property="birthday"></result>
+        <result column="sex_" property="sex"></result>
+        <result column="address_" property="address"></result>-->
+
+        <id column="id_" property="id"></id>
+        <id column="username_" property="username"></id>
+        <id column="birthday_" property="birthday"></id>
+        <id column="sex_" property="sex"></id>
+        <id column="address_" property="address"></id>
+
+    </resultMap>
+
+    <select id="findUserByIdResultMap" parameterType="int" resultMap="userResultMap">
+        SELECT id id_,username username_,birthday birthday_,sex sex_,address address_ FROM user WHERE id = #{id};
+    </select>
+
+
+    <!-- 用户信息综合查询
+     #{userCustom.sex}:这里需要注意使用对象.属性的方式来获取数据
+     -->
+    <!--<select id="findUserList" parameterType="com.sunyanxiong.mybatis.UserQueryVo"
+            resultType="com.sunyanxiong.mybatis.UserCustom">
+        SELECT * FROM user
+
+        &lt;!&ndash;<where></where> : 可以自动弃掉第一个and &ndash;&gt;
+
+        <where>
+            &lt;!&ndash;test:条件 &ndash;&gt;
+
+            <if test="userCustom.sex != null and userCustom.sex != '' ">
+                AND user.sex = #{userCustom.sex}
+            </if>
+            <if test="userCustom.username != null and userCustom.username != '' ">
+                AND user.username LIKE '%${userCustom.username}%'
+            </if>
+
+        </where>
+    </select>-->
+
+    <!-- 查询综合查询用户信息总数 -->
+    <!--<select id="findUserCount" parameterType="com.sunyanxiong.mybatis.UserQueryVo" resultType="int">
+        SELECT count(*) FROM user
+        <where>
+            <if test="userCustom.sex != null and userCustom.sex != '' ">
+                AND user.sex = #{userCustom.sex}
+            </if>
+            <if test="userCustom.username != null and userCustom.username != '' ">
+                AND user.username LIKE '%${userCustom.username}%'
+            </if>
+        </where>
+
+    </select>-->
+
+    <!-- 定义sql片段,不要将where标签写到这里，尽量写单表的sql，为了其他查询使用，提高开发 -->
+
+    <sql id="query_user_where">
+        <if test="userCustom.sex != null and userCustom.sex != '' ">
+            AND user.sex = #{userCustom.sex}
+        </if>
+        <if test="userCustom.username != null and userCustom.username != '' ">
+            AND user.username LIKE '%${userCustom.username}%'
+        </if>
+    </sql>
+
+
+    <!-- 用户信息综合查询
+     #{userCustom.sex}:这里需要注意使用对象.属性的方式来获取数据
+     -->
+    <select id="findUserList" parameterType="com.sunyanxiong.mybatis.UserQueryVo"
+            resultType="com.sunyanxiong.mybatis.UserCustom">
+        SELECT * FROM user
+
+        <!--<where></where> : 可以自动弃掉第一个and -->
+
+        <where>
+            <include refid="query_user_where"></include>
+        </where>
+    </select>
+
+    <!-- 查询综合查询用户信息总数 -->
+    <select id="findUserCount" parameterType="com.sunyanxiong.mybatis.UserQueryVo" resultType="int">
+        SELECT count(*) FROM user
+        <where>
+            <include refid="query_user_where"></include>
+        </where>
+
+    </select>
+
+    <select id="findUserListForeach" parameterType="com.sunyanxiong.mybatis.UserQueryVo"
+            resultType="com.sunyanxiong.mybatis.UserCustom">
+        SELECT * FROM user
+        <where>
+            <!-- AND (id=1 OR id=10 OR id=16)
+             ids:输入对象集合属性
+             item:每个遍历生成对象
+
+             -->
+            <if test="ids != null">
+                <foreach collection="ids" item="user_id" open="AND (" close=")" separator="or">
+                    id = #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+</mapper>

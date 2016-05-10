@@ -1,6 +1,8 @@
 package com.sunyanxiong.mapper;
 
 import com.sunyanxiong.mybatis.User;
+import com.sunyanxiong.mybatis.UserCustom;
+import com.sunyanxiong.mybatis.UserQueryVo;
 
 import java.util.List;
 
@@ -27,5 +29,17 @@ public interface UserMapper {
 
     // 新增用户信息
     public void insertUser(User user) throws Exception;
+
+    // 用户综合查询
+    public List<UserCustom> findUserList(UserQueryVo userQueryVo) throws Exception;
+
+    // 查询综合查询总数
+    public int findUserCount(UserQueryVo userQueryVo)throws Exception;
+
+    // 输出结果为resultMap
+    public User findUserByIdResultMap(int id) throws Exception;
+
+    // 遍历
+    public List<UserCustom> findUserListForeach(UserQueryVo userQueryVo) throws Exception;
 
 }
